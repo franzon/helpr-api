@@ -4,4 +4,4 @@ COPY package.json yarn.lock ./
 RUN yarn 
 COPY . .
 EXPOSE 80
-CMD ["yarn", "serve"]
+# CMD ["yarn", "serve"]

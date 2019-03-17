@@ -4,4 +4,4 @@ const mongoose = require('mongoose');
 dotenv.config();
 mongoose.connect(process.env.DB_HOST, { useNewUrlParser: true });
 
-exports = mongoose;
+module.exports = mongoose;

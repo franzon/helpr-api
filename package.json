@@ -2,23 +2,31 @@
   "name": "api",
   "version": "1.0.0",
   "description": "API para o projeto de Projeto Integrador",
-  "main": "server.js",
+  "main": "src/server.js",
   "repository": "https://github.com/pi-2019-org/api.git",
   "license": "MIT",
   "scripts": {
-    "serve": "nodemon server.js"
+    "start": "node src/server.js",
+    "serve": "nodemon src/server.js",
+    "serve-docker": "docker-compose -f docker-compose.yml up",
+    "test": "jest --coverage",
+    "test-docker": "docker-compose -f docker-compose.test.yml up --abort-on-container-exit"
   },
   "dependencies": {
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
+    "joi": "^14.3.1",
     "mongoose": "^5.4.19"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.11",
     "eslint": "^5.15.2",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0",
-    "nodemon": "^1.18.10"
+    "jest": "^24.5.0",
+    "nodemon": "^1.18.10",
+    "supertest": "^4.0.2"
   }
 }
