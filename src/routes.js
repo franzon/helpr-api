@@ -1,16 +1,11 @@
 const express = require('express');
-const exampleController = require('./controllers/example');
+const authController = require('./controllers/auth');
 
 const mainRouter = express.Router();
-const exampleRouter = express.Router();
+const authRouter = express.Router();
 
-mainRouter.use('/example', exampleRouter);
+mainRouter.use('/auth', authRouter);
 
-/*      /example        */
-exampleRouter.get('/', exampleController.get);
-exampleRouter.get('/:id', exampleController.getById);
-exampleRouter.post('/', exampleController.post);
-exampleRouter.put('/:id', exampleController.put);
-exampleRouter.delete('/:id', exampleController.remove);
+authRouter.get('/get-user/:email', authController.getUser);
 
 module.exports = mainRouter;
