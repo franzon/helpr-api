@@ -6,6 +6,6 @@ const authRouter = express.Router();
 
 mainRouter.use('/auth', authRouter);
 
-authRouter.get('/get-user/:phone', authController.getUser);
+authRouter.get('/get-user/:email', authController.getUser);
 
 module.exports = mainRouter;

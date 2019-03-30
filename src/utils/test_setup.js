@@ -2,6 +2,7 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
 
 let mongoServer;
+jest.setTimeout(30000);
 
 // Creates in-memory mongodb server for testing
 
