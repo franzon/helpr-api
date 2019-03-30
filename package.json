@@ -17,6 +17,7 @@
     "cors": "^2.8.5",
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
+    "mongodb-memory-server": "^4.2.1",
     "joi": "^14.3.1",
     "mongoose": "^5.4.19"
   },
@@ -26,6 +27,7 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0",
     "jest": "^24.5.0",
+    "jest-environment-node": "^24.5.0",
     "nodemon": "^1.18.10",
     "supertest": "^4.0.2"
   }

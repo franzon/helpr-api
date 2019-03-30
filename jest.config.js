@@ -58,7 +58,7 @@ module.exports = {
   // forceCoverageMatch: [],
 
   // A path to a module which exports an async function that is triggered once before all test suites
-  // globalSetup: null,
+  //  globalSetup: './src/utils/test_setup.js',
 
   // A path to a module which exports an async function that is triggered once after all test suites
   // globalTeardown: null,
@@ -106,7 +106,7 @@ module.exports = {
   // resetMocks: false,
 
   // Reset the module registry before running each individual test
-  // resetModules: false,
+  // resetModules: true,
 
   // A path to a custom resolver
   // resolver: null,
@@ -129,7 +129,7 @@ module.exports = {
   // setupFiles: [],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
-  // setupFilesAfterEnv: [],
+  setupFilesAfterEnv: ['./src/utils/test_setup.js'],
 
   // A list of paths to snapshot serializer modules Jest should use for snapshot testing
   // snapshotSerializers: [],
