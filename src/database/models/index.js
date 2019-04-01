@@ -1,3 +1,7 @@
 const User = require('./user');
+const Email = require('./email');
 
-module.exports = { User };
+module.exports = {
+  User,
+  Email,
+};
