@@ -69,7 +69,7 @@ module.exports = {
 
   // An array of directory names to be searched recursively up from the requiring module's location
   // moduleDirectories: [
-  //   "node_modules"
+  //   '/node_modules/'
   // ],
 
   // An array of file extensions your modules use
@@ -152,10 +152,10 @@ module.exports = {
 
   // An array of regexp pattern strings that are matched against all test paths,
   // matched tests are skipped
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    '/src/controllers/emailConfirmation/',
-  ],
+  // testPathIgnorePatterns: [
+  //   '/node_modules/',
+  //   '/src/controllers/emailConfirmation.js',
+  // ],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],
@@ -176,9 +176,10 @@ module.exports = {
   // transform: null,
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
-  transformIgnorePatterns: [
-    '/node_modules/',
-  ],
+  // transformIgnorePatterns: [
+  //   '/node_modules/',
+  //   '/src/controllers/emailConfirmation/',  
+  // ],
 
   // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
   // unmockedModulePathPatterns: undefined,
