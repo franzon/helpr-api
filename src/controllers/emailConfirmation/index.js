@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 const Joi = require('joi');
-const models = require('../database/models');
-const { validateRequest } = require('../utils/validation');
+const models = require('../../database/models');
+const { validateRequest } = require('../../utils/validation');
 
 const sendEmail = (email, subject, text) => {
   const smtpTransport = nodemailer.createTransport({
