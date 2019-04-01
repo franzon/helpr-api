@@ -9,7 +9,7 @@
     "start": "node src/server.js",
     "serve": "nodemon src/server.js",
     "serve-docker": "docker-compose -f docker-compose.yml up",
-    "test": "jest --coverage --testPathIgnorePatterns src/controllers/emailConfirmation.* ",
+    "test": "jest --coverage",
     "test-docker": "docker-compose -f docker-compose.test.yml up --abort-on-container-exit"
   },
   "dependencies": {
