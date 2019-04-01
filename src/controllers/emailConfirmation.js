@@ -32,7 +32,7 @@ async function sendConfirmationCode(req, res) {
     },
   };
 
-  const error = validateRequest({ params: req.params }, schema); // validation
+  const error = validateRequest({ params: { email: req.body.email } }, schema); // validation
   if (error !== null) return res.status(400).json({ success: false, error }); // erro
 
   const subject = 'Confirmation Code';
@@ -49,7 +49,7 @@ async function sendConfirmationCode(req, res) {
   
   `;
 
-  const email = await models.Email.findOne({ email: req.params.email });
+  const email = await models.Email.findOne({ email: req.body.email });
   if (!email) {
     const emailModel = new models.Email({ email, confirmationCode });
     await emailModel.save();
@@ -58,8 +58,8 @@ async function sendConfirmationCode(req, res) {
     await email.save();
   }
 
-  sendEmail(req.params.email, subject, text);
-  return res.json({ sucess: true, data: { email: req.params.email } });
+  sendEmail(req.body.email, subject, text);
+  return res.status(200).json({ sucess: true, data: { email: req.body.email } });
 }
 
 async function confirmEmail(req, res) {

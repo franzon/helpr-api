@@ -7,11 +7,11 @@ const authRouter = express.Router();
 const confirmationRouter = express.Router();
 
 mainRouter.use('/auth', authRouter);
-mainRouter.use('/confirmation', confirmationRouter); // email confirmation router
+mainRouter.use('/validation', confirmationRouter); // email confirmation router
 
 authRouter.get('/get-user/:email', authController.getUser);
 
-confirmationRouter.get('/', emailConfirmation.confirmEmail); // body {email, confirmationCode}
-confirmationRouter.post('/:email', emailConfirmation.sendConfirmationCode); // params {email}
+confirmationRouter.get('/:email', emailConfirmation.confirmEmail); // body {email, confirmationCode}
+confirmationRouter.post('/', emailConfirmation.sendConfirmationCode); // body {email}
 
 module.exports = mainRouter;
