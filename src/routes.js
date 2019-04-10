@@ -1,17 +1,14 @@
 const express = require('express');
 const authController = require('./controllers/auth');
-const emailConfirmation = require('./controllers/emailConfirmation');
 
 const mainRouter = express.Router();
 const authRouter = express.Router();
-const confirmationRouter = express.Router();
 
 mainRouter.use('/auth', authRouter);
-mainRouter.use('/validation', confirmationRouter); // email confirmation router
 
 authRouter.get('/get-user/:email', authController.getUser);
 
-confirmationRouter.get('/:email', emailConfirmation.confirmEmail); // body {email, confirmationCode}
-confirmationRouter.post('/', emailConfirmation.sendConfirmationCode); // body {email}
+authRouter.post('/email-confirmation/send-code', authController.sendConfirmationCode);
+authRouter.post('/email-confirmation/verify', authController.confirmEmail);
 
 module.exports = mainRouter;

@@ -29,4 +29,8 @@ describe('[controller] auth.js', () => {
       expect(response.body.data).toStrictEqual({ name: 'John' });
     });
   });
+
+  describe('sendConfirmationCode', () => {});
+
+  describe('confirmEmail', () => {});
 });
