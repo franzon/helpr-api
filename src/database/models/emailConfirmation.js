@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
-const emailConfirmation = mongoose.Schema({
+const emailConfirmationSchema = mongoose.Schema({
   email: String,
   confirmationCode: String,
   createdAt: { type: Date, expires: 3600 * 12 },
 });
 
-module.exports = mongoose.model('EmailConfirmation', emailConfirmation);
+module.exports = mongoose.model('EmailConfirmation', emailConfirmationSchema);

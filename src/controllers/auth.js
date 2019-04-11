@@ -1,7 +1,6 @@
 const Joi = require('joi');
 const models = require('../database/models');
 const { validateRequest } = require('../utils/validation');
-const { sendEmail } = require('../utils/email');
 
 /*
     Check if an user exists by its email.
@@ -41,7 +40,7 @@ async function getUser(req, res) {
 async function sendConfirmationCode(req, res) {
   // email validation schema
   const schema = {
-    params: {
+    body: {
       email: Joi.string()
         .regex(
           /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
@@ -50,8 +49,10 @@ async function sendConfirmationCode(req, res) {
     },
   };
 
-  const error = validateRequest({ params: { email: req.body.email } }, schema); // validation
+  const error = validateRequest({ body: req.body }, schema); // validation
   if (error !== null) return res.status(400).json({ success: false, error }); // erro
+
+  const { email } = req.body;
 
   const subject = 'Confirmation Code';
 
@@ -67,47 +68,74 @@ async function sendConfirmationCode(req, res) {
   
   `;
 
-  const email = await models.Email.findOne({ email: req.body.email });
-  if (!email) {
-    const emailModel = new models.Email({ email, confirmationCode });
-    await emailModel.save();
-  } else {
-    email.confirmationCode = confirmationCode;
-    await email.save();
+  const user = await models.User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ error: 'user_not_exists' });
+  }
+  if (user.isConfirmed) {
+    return res.json({ error: 'already_confirmed' });
   }
 
-  sendEmail(req.body.email, subject, text);
-  return res.status(200).json({ sucess: true, data: { email: req.body.email } });
+  const emailConfirmation = await models.EmailConfirmation.findOne({ email });
+  if (!emailConfirmation) {
+    const emailModel = new models.EmailConfirmation({ email, confirmationCode });
+    await emailModel.save();
+  } else {
+    emailConfirmation.confirmationCode = confirmationCode;
+    await emailConfirmation.save();
+  }
+
+  // Jest...
+  // eslint-disable-next-line global-require
+  const { sendEmail } = require('../utils/email');
+  sendEmail(email, subject, text);
+
+  return res.status(200).json({ sucess: true, data: { sent: true } });
 }
 
 async function confirmEmail(req, res) {
   // email validation schema
   const schema = {
-    params: {
+    body: {
       email: Joi.string()
         .regex(
           /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
         )
         .required(),
+      confirmationCode: Joi.string().required(),
     },
   };
 
-  const error = validateRequest({ params: { email: req.body.email } }, schema); // validation
+  const error = validateRequest({ body: req.body }, schema); // validation
   if (error !== null) return res.status(400).json({ success: false, error }); // erro
 
-  const email = await models.Email.findOne({
-    confirmationCode: req.body.confirmationCode,
-  });
+  const { email, confirmationCode } = req.body;
 
-  if (!email) {
-    return res.status(404).json({ sucess: false, msg: 'invalid code' });
+  const user = await models.User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ error: 'user_not_exists' });
+  }
+  if (user.isConfirmed) {
+    return res.json({ error: 'already_confirmed' });
   }
 
-  await models.Email.deleteOne({ email: req.body.email });
+  const emailConfirmation = await models.EmailConfirmation.findOne({
+    email,
+    confirmationCode,
+  });
+
+  if (!emailConfirmation) {
+    return res.status(404).json({ sucess: false, msg: 'invalid_code' });
+  }
+
+  user.isConfirmed = true;
+  await user.save();
+
+  await models.EmailConfirmation.deleteOne({ email });
   return res.status(200).json({
     sucess: true,
     data: {
-      email: req.body.email,
+      email,
     },
   });
 }
