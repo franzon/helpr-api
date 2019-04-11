@@ -153,7 +153,7 @@ module.exports = {
   // matched tests are skipped
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/src/controllers/emailConfirmation.js',
+    // '/src/controllers/emailConfirmation.js',
   ],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
