@@ -8,4 +8,7 @@ mainRouter.use('/auth', authRouter);
 
 authRouter.get('/get-user/:email', authController.getUser);
 
+authRouter.post('/email-confirmation/send-code', authController.sendConfirmationCode);
+authRouter.post('/email-confirmation/verify', authController.confirmEmail);
+
 module.exports = mainRouter;
