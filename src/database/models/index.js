@@ -1,3 +1,7 @@
 const User = require('./user');
+const EmailConfirmation = require('./emailConfirmation');
 
-module.exports = { User };
+module.exports = {
+  User,
+  EmailConfirmation,
+};

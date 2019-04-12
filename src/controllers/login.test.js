@@ -2,8 +2,8 @@ const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const models = require('../database/models');
-const app = require('../app');
 const keys = require('../config/keys.json');
+const app = require('../app');
 
 describe('[controller] login.js', () => {
   describe('login', () => {
