@@ -9,7 +9,11 @@ jest.setTimeout(30000);
 global.beforeAll(async () => {
   mongoServer = new MongoMemoryServer();
   const mongoUri = await mongoServer.getConnectionString();
-  await mongoose.connect(mongoUri, { useNewUrlParser: true });
+  await mongoose.connect(mongoUri, {
+    useNewUrlParser: true,
+    useFindAndModify: true,
+    useCreateIndex: true,
+  });
 });
 
 global.afterAll(async () => {
