@@ -5,6 +5,7 @@ const cors = require('cors');
 
 const authenticationRouter = require('./routes/authentication');
 const categoriesRouter = require('./routes/categories');
+const userRouter = require('./routes/user');
 
 const app = express();
 dotenv.config();
@@ -16,6 +17,7 @@ app.use(bodyParser.json());
 const router = express.Router();
 router.use('/authentication', authenticationRouter);
 router.use('/categories', categoriesRouter);
+router.use('/user', userRouter);
 
 app.use('/api', router);
 
