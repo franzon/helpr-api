@@ -1,51 +1,25 @@
 const request = require('supertest');
-const models = require('../database/models');
-const app = require('../app');
+const models = require('../../database/models');
+const app = require('../../app');
 
-describe('[controller] auth.js', () => {
-  describe('getUser', () => {
-    test('It returns null for data if user doesnt exists', async () => {
-      const response = await request(app).get('/api/auth/get-user/john@doe.com');
-      expect(response.status).toBe(200);
-      expect(response.body.success).toBeTruthy();
-      expect(response.body.data).toBeNull();
-    });
-
-    test('It returns error for invalid email', async () => {
-      const response = await request(app).get('/api/auth/get-user/john@@doe.com');
-      expect(response.status).toBe(400);
-      expect(response.body.success).toBeFalsy();
-      expect(response.body.error).not.toBeNull();
-    });
-
-    test('It returns user name if user exists', async () => {
-      const user = new models.User({ email: 'john@doe.com', name: 'John' });
-      await user.save();
-
-      const response = await request(app).get('/api/auth/get-user/john@doe.com');
-      expect(response.status).toBe(200);
-      expect(response.body.success).toBeTruthy();
-
-      expect(response.body.data).toStrictEqual({ name: 'John' });
-    });
-  });
-
+describe('domains/authentication/email.js', () => {
   describe('sendConfirmationCode', () => {
     test('It returns error for invalid email', async () => {
       const response = await request(app)
-        .post('/api/auth/email-confirmation/send-code')
+        .post('/api/authentication/email/sendConfirmationCode')
         .send({ email: 'john@@doe.com' });
       expect(response.status).toBe(400);
-      expect(response.body.success).toBeFalsy();
-      expect(response.body.error).not.toBeNull();
+      expect(response.body.message).not.toBeNull();
+      expect(response.body.data).toBeNull();
     });
 
     test('It returns error if user does not exists', async () => {
       const response = await request(app)
-        .post('/api/auth/email-confirmation/send-code')
+        .post('/api/authentication/email/sendConfirmationCode')
         .send({ email: 'john@doe.com' });
-      expect(response.status).toBe(404);
-      expect(response.body.error).toBe('user_not_exists');
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe('user not exists');
+      expect(response.body.data).toBeNull();
     });
 
     test('It returns error if user its already confirmed', async () => {
@@ -53,10 +27,11 @@ describe('[controller] auth.js', () => {
       await user.save();
 
       const response = await request(app)
-        .post('/api/auth/email-confirmation/send-code')
+        .post('/api/authentication/email/sendConfirmationCode')
         .send({ email: 'john@doe.com' });
       expect(response.status).toBe(200);
-      expect(response.body.error).toBe('already_confirmed');
+      expect(response.body.message).toBe('already confirmed');
+      expect(response.body.data).toBeNull();
     });
 
     test('It sends a new verification email', async () => {
@@ -70,10 +45,11 @@ describe('[controller] auth.js', () => {
       await user.save();
 
       const response = await request(app)
-        .post('/api/auth/email-confirmation/send-code')
+        .post('/api/authentication/email/sendConfirmationCode')
         .send({ email: 'john@doe.com' });
       expect(response.status).toBe(200);
-      expect(response.body.data).toStrictEqual({ sent: true });
+      expect(response.body.message).toBe('email sent');
+      expect(response.body.data).toBeNull();
 
       const emailConfirmation = await models.EmailConfirmation.findOne({ email: 'john@doe.com' });
       expect(emailConfirmation.confirmationCode).not.toBeNull();
@@ -102,10 +78,11 @@ describe('[controller] auth.js', () => {
 
       expect(emailConfirmation.confirmationCode).toBe('777');
       const response = await request(app)
-        .post('/api/auth/email-confirmation/send-code')
+        .post('/api/authentication/email/sendConfirmationCode')
         .send({ email: 'john@doe.com' });
       expect(response.status).toBe(200);
-      expect(response.body.data).toStrictEqual({ sent: true });
+      expect(response.body.message).toBe('email sent');
+      expect(response.body.data).toBeNull();
 
       emailConfirmation = await models.EmailConfirmation.findOne({ email: 'john@doe.com' });
       expect(emailConfirmation.confirmationCode).not.toBeNull();
@@ -120,28 +97,29 @@ describe('[controller] auth.js', () => {
   describe('confirmEmail', () => {
     test('It returns error for invalid email', async () => {
       const response = await request(app)
-        .post('/api/auth/email-confirmation/verify')
+        .post('/api/authentication/email/confirmEmail')
         .send({ email: 'john@@doe.com', confirmationCode: '777' });
       expect(response.status).toBe(400);
-      expect(response.body.success).toBeFalsy();
-      expect(response.body.error).not.toBeNull();
+      expect(response.body.message).not.toBeNull();
+      expect(response.body.data).toBeNull();
     });
 
     test('It returns error for invalid confirmation code', async () => {
       const response = await request(app)
-        .post('/api/auth/email-confirmation/verify')
+        .post('/api/authentication/email/confirmEmail')
         .send({ email: 'john@doe.com', confirmationCode: null });
       expect(response.status).toBe(400);
-      expect(response.body.success).toBeFalsy();
-      expect(response.body.error).not.toBeNull();
+      expect(response.body.message).not.toBeNull();
+      expect(response.body.data).toBeNull();
     });
 
     test('It returns error if user does not exists', async () => {
       const response = await request(app)
-        .post('/api/auth/email-confirmation/verify')
+        .post('/api/authentication/email/confirmEmail')
         .send({ email: 'john@doe.com', confirmationCode: '777' });
-      expect(response.status).toBe(404);
-      expect(response.body.error).toBe('user_not_exists');
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe('user not exists');
+      expect(response.body.data).toBeNull();
     });
 
     test('It returns error if user its already confirmed', async () => {
@@ -149,10 +127,11 @@ describe('[controller] auth.js', () => {
       await user.save();
 
       const response = await request(app)
-        .post('/api/auth/email-confirmation/verify')
+        .post('/api/authentication/email/confirmEmail')
         .send({ email: 'john@doe.com', confirmationCode: '777' });
       expect(response.status).toBe(200);
-      expect(response.body.error).toBe('already_confirmed');
+      expect(response.body.message).toBe('already confirmed');
+      expect(response.body.data).toBeNull();
     });
 
     test('It returns error if code is invalid', async () => {
@@ -168,10 +147,11 @@ describe('[controller] auth.js', () => {
       expect(emailConfirmation.confirmationCode).toBe('777');
 
       const response = await request(app)
-        .post('/api/auth/email-confirmation/verify')
+        .post('/api/authentication/email/confirmEmail')
         .send({ email: 'john@doe.com', confirmationCode: '778' });
-      expect(response.status).toBe(404);
-      expect(response.body.msg).toBe('invalid_code');
+      expect(response.status).toBe(400);
+      expect(response.body.message).toBe('invalid code');
+      expect(response.body.data).toBeNull();
 
       user = await models.User.findOne({ email: 'john@doe.com' });
       expect(user.isConfirmed).toBeFalsy();
@@ -196,13 +176,14 @@ describe('[controller] auth.js', () => {
       expect(emailConfirmation.confirmationCode).toBe('777');
 
       const response = await request(app)
-        .post('/api/auth/email-confirmation/verify')
+        .post('/api/authentication/email/confirmEmail')
         .send({ email: 'john@doe.com', confirmationCode: '777' });
       expect(response.status).toBe(200);
-      expect(response.body.data.email).toBe('john@doe.com');
+      expect(response.body.message).toBe('email confirmed');
 
       user = await models.User.findOne({ email: 'john@doe.com' });
       expect(user.isConfirmed).toBeTruthy();
+      expect(response.body.data).toBeNull();
 
       emailConfirmation = await models.EmailConfirmation.findOne({
         email: 'john@doe.com',

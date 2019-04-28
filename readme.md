@@ -4,7 +4,7 @@
 
 ## Docs
 
-[Docker](docs/docker.md)
+<!-- [Docker](docs/docker.md) -->
 [Travis](docs/travis.md)
 
 ## WIP
