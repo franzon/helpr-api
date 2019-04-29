@@ -2,7 +2,10 @@ const express = require('express');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const routes = require('./routes');
+
+const authenticationRouter = require('./routes/authentication');
+const categoriesRouter = require('./routes/categories');
+const userRouter = require('./routes/user');
 
 const app = express();
 dotenv.config();
@@ -11,6 +14,11 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use('/api', routes);
+const router = express.Router();
+router.use('/authentication', authenticationRouter);
+router.use('/categories', categoriesRouter);
+router.use('/user', userRouter);
+
+app.use('/api', router);
 
 module.exports = app;

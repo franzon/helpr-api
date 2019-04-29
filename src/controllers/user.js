@@ -1,52 +1,3 @@
-const Joi = require('joi');
-const models = require('../database/models');
-const bcrypt = require('bcrypt');
-const { validateRequest } = require('../utils/validation');
-
-async function createUser(req, res) {
-  const { name, email, password, phone } = req.body;
-  /*
-  const schema = {
-    params: {
-      email: Joi.string()
-      .regex(
-        /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
-      )
-      .required(),// Falta parametros.
-    },
-  };
-  */
-  var newUser = new models.User({
-    name,
-    email,
-    phone,
-    password: await bcrypt.hash(password, 10),
-  });
-
-  /*
-      Validation fields required.
-   */
-
-  try {
-    await newUser.save();
-
-    return res.json({
-      success: true,
-      data: {
-        name,
-        email,
-        phone
-      }
-    });
-  } catch(err) {
-    if(err.name === 'MongoError' && err.code === 11000) {
-      return res.status(400).json({ success: false, error: 'User already exists.' });
-    }
-
-    return res.status(500).json({ success: false, error: err });
-  }
-
-}
 /*
 async function getUser(req, res) {
   const { email } = req.body;
@@ -143,10 +94,3 @@ async function deleteUser(req, res) {
   }
 }
 */
-module.exports = {
-  createUser,/*
-  getUser,
-  getUserById,
-  updateUser,
-  deleteUser,*/
-};
