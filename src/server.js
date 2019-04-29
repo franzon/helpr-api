@@ -1,8 +1,8 @@
 require('./database/database');
 const app = require('./app');
 
-const host = process.env.HOST || '127.0.0.1';
-const port = process.env.PORT || 3000;
+const host = process.env.HOST;
+const port = process.env.PORT;
 
 app.listen(port, host, () => {
   // eslint-disable-next-line no-console
