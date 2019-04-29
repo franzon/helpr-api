@@ -1,7 +1,7 @@
 module.exports = {
   clearMocks: true,
   coverageDirectory: 'coverage',
-  coveragePathIgnorePatterns: ['/node_modules/', '/src/controllers/emailConfirmation/'],
+  coveragePathIgnorePatterns: ['/node_modules/'],
   coverageThreshold: {
     global: {
       branches: 100,
