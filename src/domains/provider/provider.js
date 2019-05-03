@@ -102,7 +102,7 @@ async function addProvider(req, res) {
 
   return res.status(200).send({
     message: 'success',
-    data: resProvider,
+    data: resProvider.email,
   });
 }
 
@@ -129,7 +129,7 @@ const deleteProvider = async (req, res) => {
   const provider = await models.Provider.findOneAndDelete({ email }, (err) => {
     if (err) {
       return res.status(400).send({
-        message: 'user not exists',
+        message: 'fail',
         data: null,
       });
     }

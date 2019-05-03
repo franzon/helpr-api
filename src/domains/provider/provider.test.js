@@ -46,7 +46,7 @@ describe('addProvider', () => {
     expect(res.body.data).toBeNull();
   });
   test('It return error for invalid data', async () => {
-    const res = await request(app).post('api/provider').send(
+    const res = await request(app).post('/api/provider').send(
       {
         email: 'dennis',
         name: 'Dennis',
@@ -83,7 +83,7 @@ describe('findProvider', () => {
 
     await provider.save();
 
-    const res = await request(app).get('api/provider/getProvider:joe@joe');
+    const res = await request(app).get('/api/provider/getProvider:joe@joe');
 
     expect(res.status).toBe(200);
     expect(res.body.message).toStrictEqual('succes');
@@ -91,7 +91,7 @@ describe('findProvider', () => {
   });
 
   test('It should response error for GET method when user not found', async () => {
-    const res = await request(app).get('api/provider/getProvider:joe@joe');
+    const res = await request(app).get('/api/provider/getProvider:joe@joe');
 
     expect(res.status).toBe(400);
     expect(res.body.message).toStrictEqual('user not found');
@@ -116,7 +116,7 @@ describe('deleteProvider', () => {
 
     await provider.save();
 
-    const res = await request(app).delete('api/provider/:joe@joe');
+    const res = await request(app).delete('/api/provider/:joe@joe');
 
     expect(res.status).toBe(200);
     expect(res.message).toStrictEqual('success');
@@ -124,10 +124,10 @@ describe('deleteProvider', () => {
   });
 
   test('It should response error for DELETE method', async () => {
-    const res = await request(app).delete('api/provider/:joe@joe');
+    const res = await request(app).delete('/api/provider/:joe@joe');
 
     expect(res.status).toBe(400);
-    expect(res.body.message).toStrictEqual('user not exists');
+    expect(res.body.message).toStrictEqual('fail');
     expect(res.body.data).toBeNull();
   });
 });
