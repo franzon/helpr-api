@@ -1,8 +1,6 @@
 const request = require('supertest');
-const mongoose = require('mongoose');
 const models = require('../../database/models');
 const app = require('../../app');
-const database = require('../../database/database');
 
 describe('domains/authentication/user.js', () => {
   describe('getUserNameByEmail', () => {
