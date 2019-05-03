@@ -8,27 +8,27 @@
   "scripts": {
     "start": "node src/server.js",
     "serve": "nodemon src/server.js",
-    "test": "jest --coverage"
+    "test": "jest --coverage --runInBand"
   },
   "dependencies": {
-    "@types/joi": "^14.3.2",
-    "body-parser": "^1.18.3",
+    "@types/joi": "^14.3.3",
+    "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
     "joi": "^14.3.1",
-    "mongodb-memory-server": "^4.2.1",
-    "mongoose": "^5.4.19",
-    "nodemailer": "^6.0.0"
+    "mongoose": "^5.5.4",
+    "nodemailer": "^6.1.1"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.11",
-    "eslint": "^5.15.2",
+    "@types/jest": "^24.0.12",
+    "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.16.0",
-    "jest": "^24.5.0",
-    "jest-environment-node": "^24.5.0",
-    "nodemon": "^1.18.10",
+    "eslint-plugin-import": "^2.17.2",
+    "jest": "^24.7.1",
+    "jest-environment-node": "^24.7.1",
+    "mocha": "^6.1.4",
+    "nodemon": "^1.18.11",
     "supertest": "^4.0.2"
   }
 }
