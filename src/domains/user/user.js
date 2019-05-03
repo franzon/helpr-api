@@ -73,33 +73,128 @@ async function createUser(req, res) {
     schema,
   );
 
-  if (error) return res.status(400).json({ message: error, data: null });
+  if (error) return res.status(400).json({ success: false, message: error, data: null });
 
-  const newUser = new models.User({
+  const user = await models.User.find({ email });
+  if (user !== undefined && user.length) return res.status(400).json({ success: false, error: 'User already exists.' });
+
+  const newUser = await models.User.create({
     name,
     email,
     phone,
     password: await bcrypt.hash(password, 10),
   });
 
+  /* istanbul ignore next */
+  if (!newUser) {
+    return res.status(500).json({ success: false, error: 'erro de conexao com' });
+  }
+
+  return res.json({
+    success: true,
+    data: {
+      name,
+      email,
+      phone,
+    },
+  });
+}
+
+/*
+async function getUser(req, res) {
+  const { email } = req.body;
+
+  const user = await models.User.findOne({ email });
+
+  if(!user) {
+    return res.json({ success: true, data: null });
+  }
+
+  return res.json({
+    success: true,
+    data: {
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+    },
+  });
+}
+
+async function getUserById(req, res) {
+  const { id } = req.params;
+
+  const user = await models.User.findOne({ _id: id });
+
+  if(!user) {
+    return res.json({ success: true, data: null });
+  }
+
+  return res.json({
+    success: true,
+    data: {
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+    },
+  });
+}
+
+async function updateUser(req, res) {
+  const { id, name, email, phone, password } = req.body;
+
   try {
-    await newUser.save();
+    const user = await models.User.findOneAndUpdate({ _id: id }, {
+      ...(name !== undefined ? { name } : {}),
+      ...(email !== undefined ? { email } : {}),
+      ...(phone !== undefined ? { phone } : {}),
+      ...(password !== undefined ? {
+          password: await bcrypt.hash(password, 10),
+        } : {}),
+    });
+
+    if(!user) {
+      return res.status(400).json({ success: false, data: null });
+    }
 
     return res.json({
       success: true,
       data: {
-        name,
-        email,
-        phone,
-      },
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      }
+    })
+  } catch(error) {
+    return res.status(400).json({
+      success: false, data: null,
+      message: 'erro ao atualizar o usuario',
     });
-  } catch (err) {
-    if (err.name === 'MongoError' && err.code === 11000) {
-      return res.status(400).json({ success: false, error: 'User already exists.' });
-    }
-
-    return res.status(500).json({ success: false, error: err });
   }
 }
+
+async function deleteUser(req, res) {
+  const  { id } = req.body;
+
+  try {
+    const user = await models.User.deleteOne({ _id: id });
+
+    if(!user) {
+      return res.json({ success: true, data: null });
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      },
+    })
+
+  } catch(error) {
+    return res.status(400).json({ success: false, data: null });
+  }
+}
+*/
 
 module.exports = { getUserNameByEmail, createUser };
