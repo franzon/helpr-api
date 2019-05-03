@@ -1,15 +1,9 @@
-const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
 
-let mongoServer;
 jest.setTimeout(30000);
 
-// Creates in-memory mongodb server for testing
-
 global.beforeAll(async () => {
-  mongoServer = new MongoMemoryServer();
-  const mongoUri = await mongoServer.getConnectionString();
-  await mongoose.connect(mongoUri, {
+  await mongoose.connect(process.env.TESTING_DB_HOST, {
     useNewUrlParser: true,
     useFindAndModify: true,
     useCreateIndex: true,
@@ -18,7 +12,6 @@ global.beforeAll(async () => {
 
 global.afterAll(async () => {
   await mongoose.disconnect();
-  await mongoServer.stop();
 });
 
 // Drop database before/after each test for isolation
