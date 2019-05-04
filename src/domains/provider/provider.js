@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const Joi = require('joi');
 const models = require('../../database/models');
-const { validateRequest } = require('../../utils/validation');
+const { validateRequest, regexes } = require('../../utils/validation');
 
 async function addProvider(req, res) {
   const {
@@ -9,6 +9,8 @@ async function addProvider(req, res) {
     name,
     password,
     cep,
+    address,
+    neighborhood,
     numberAddress,
     phoneNumber,
     category,
@@ -29,21 +31,19 @@ async function addProvider(req, res) {
   const schema = {
     body: {
       email: Joi.string()
-        .regex(
-          /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
-        )
+        .regex(regexes.email)
         .required(),
       name: Joi.string()
         .required(),
       password: Joi.string()
-        .regex(
-          /^[a-zA-Z0-9@.!#$%&'*+/=?^_`{|}~-]{6,100}$/,
-        )
+        .regex(regexes.password)
         .required(),
       cep: Joi.string()
-        .regex(
-          /^[0-9]{5}-[\d]{3}$/,
-        )
+        .regex(regexes.cep)
+        .required(),
+      address: Joi.string()
+        .required(),
+      neighborhood: Joi.string()
         .required(),
       numberAddress: Joi.string()
         .required(),
@@ -59,9 +59,7 @@ async function addProvider(req, res) {
       servicePrice: Joi.string()
         .required(),
       cpf: Joi.string()
-        .regex(
-          /^[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}$/,
-        )
+        .regex(regexes.cpf)
         .required(),
     },
   };
@@ -73,6 +71,8 @@ async function addProvider(req, res) {
         name,
         password,
         cep,
+        address,
+        neighborhood,
         numberAddress,
         phoneNumber,
         category,
@@ -80,7 +80,8 @@ async function addProvider(req, res) {
         servicePrice,
         cpf,
       },
-    }, schema,
+    },
+    schema,
   );
 
   if (error !== null) return res.status(400).send({ message: 'fail validation', data: null });
@@ -92,6 +93,8 @@ async function addProvider(req, res) {
     name,
     password: hashPassword,
     cep,
+    address,
+    neighborhood,
     numberAddress,
     phoneNumber,
     category,
@@ -108,7 +111,29 @@ async function addProvider(req, res) {
 
 const findProvider = async (req, res) => {
   const { email } = req.params;
-  const provider = models.Provider.find({ email });
+
+  const schema = {
+    params: {
+      email: Joi.string()
+        .regex(
+          /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+        )
+        .required(),
+    },
+  };
+
+  const error = validateRequest(
+    {
+      params: {
+        email,
+      },
+    }, schema,
+  );
+
+
+  if (error !== null) return res.status(400).send({ message: 'fail validation', data: null });
+
+  const provider = await models.Provider.findOne({ email });
 
   if (provider === null) {
     return res.status(400).send({
@@ -126,17 +151,38 @@ const findProvider = async (req, res) => {
 const deleteProvider = async (req, res) => {
   const { email } = req.params;
 
-  const provider = await models.Provider.findOneAndDelete({ email }, (err) => {
-    if (err) {
-      return res.status(400).send({
-        message: 'fail',
-        data: null,
-      });
-    }
-    return res.status(200).send({
-      message: 'success',
-      data: provider,
+  const schema = {
+    params: {
+      email: Joi.string()
+        .regex(
+          /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+        )
+        .required(),
+    },
+  };
+
+  const error = validateRequest(
+    {
+      params: {
+        email,
+      },
+    }, schema,
+  );
+
+
+  if (error !== null) return res.status(400).send({ message: 'fail validation', data: null });
+
+  const provider = await models.Provider.findOneAndDelete({ email });
+
+  if (provider === null) {
+    return res.status(400).send({
+      message: 'fail',
+      data: null,
     });
+  }
+  return res.status(200).send({
+    message: 'success',
+    data: null,
   });
 };
 
