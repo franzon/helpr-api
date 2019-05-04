@@ -6,6 +6,7 @@ const cors = require('cors');
 const authenticationRouter = require('./routes/authentication');
 const categoriesRouter = require('./routes/categories');
 const userRouter = require('./routes/user');
+const providerRouter = require('./routes/provider');
 
 const app = express();
 dotenv.config();
@@ -18,6 +19,7 @@ const router = express.Router();
 router.use('/authentication', authenticationRouter);
 router.use('/categories', categoriesRouter);
 router.use('/user', userRouter);
+router.use('/provider', providerRouter);
 
 app.use('/api', router);
 
