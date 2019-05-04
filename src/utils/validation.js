@@ -11,6 +11,8 @@ const regexes = {
   name: /^[a-zA-Z]{4,}$/,
   phone: /(\([0-9]{2}\)|[0-9]{2})\s[0-9]{1}(\s)?[0-9]{4}(\s|-)[0-9]{4}/,
   password: /^[a-zA-Z0-9@]{8,}$/,
+  cep: /^[0-9]{5}-[\d]{3}$/,
+  cpf: /^[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}$/,
 };
 
 module.exports = { validateRequest, regexes };
