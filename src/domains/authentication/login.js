@@ -27,7 +27,7 @@ async function login(req, res) {
   const { email, password } = req.body;
 
   const user = await models.User.findOne({ email });
-  
+
   if (user !== null) {
     if (await bcrypt.compareSync(password, user.password)) {
       const token = await jwt.sign(user.email, keys.jwt);
