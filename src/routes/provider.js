@@ -3,6 +3,6 @@ const providerController = require('../domains/provider/provider');
 
 providerRouter.post('/', providerController.addProvider);
 providerRouter.delete('/:email', providerController.deleteProvider);
-providerRouter.get('/getProvider/:email', providerController.findProvider);
+providerRouter.get('/findProvider/:email', providerController.findProvider);
 
 module.exports = providerRouter;
