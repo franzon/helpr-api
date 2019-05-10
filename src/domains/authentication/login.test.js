@@ -10,7 +10,7 @@ describe('[DOMAIN/AUTHENTICATION] login.js', () => {
   describe('login', () => {
     test('It returns error if user/provider doesnt exists', async () => {
       const response = await request(app)
-        .post('/api/authentication/login')
+        .post('/api/authentication/login/user')
         .send({
           email: 'otavio@ogoes.dev',
           password: '12345678',
@@ -23,7 +23,7 @@ describe('[DOMAIN/AUTHENTICATION] login.js', () => {
 
     test('It returns error for invalid email', async () => {
       const response = await request(app)
-        .post('/api/authentication/login')
+        .post('/api/authentication/login/user')
         .send({
           email: 'otavio-ogoes',
           password: '123456',
@@ -43,7 +43,7 @@ describe('[DOMAIN/AUTHENTICATION] login.js', () => {
       await user.save();
 
       const response = await request(app)
-        .post('/api/authentication/login')
+        .post('/api/authentication/login/user')
         .send({
           email: 'otavio@ogoes.de',
           password: '12345671',
@@ -63,7 +63,7 @@ describe('[DOMAIN/AUTHENTICATION] login.js', () => {
       await user.save();
 
       const response = await request(app)
-        .post('/api/authentication/login')
+        .post('/api/authentication/login/user')
         .send({
           email: 'otavio@ogoes.dev',
           password: '12345678',
@@ -94,7 +94,7 @@ describe('[DOMAIN/AUTHENTICATION] login.js', () => {
       await provider.save();
 
       const response = await request(app)
-        .post('/api/authentication/login')
+        .post('/api/authentication/login/provider')
         .send({
           email: 'otavio@ogoes.dev',
           password: '12345678',

@@ -25,31 +25,24 @@ async function login(req, res) {
   }
 
   const { email, password } = req.body;
+  const { userOrProvider } = req.params;
 
-  const user = await models.User.findOne({ email });
-  const provider = await models.Provider.findOne({ email });
+  let person;
 
-  let personEmail;
-  let personPassword;
-  let personName;
-
-  if (user !== null) {
-    personEmail = user.email;
-    personPassword = user.password;
-    personName = user.name;
-  } else if (provider !== null) {
-    personEmail = provider.email;
-    personPassword = provider.password;
-    personName = provider.name;
+  if (userOrProvider === 'user') {
+    person = await models.User.findOne({ email });
+  }
+  if (userOrProvider === 'provider') {
+    person = await models.Provider.findOne({ email });
   }
 
-  if (user !== null || provider !== null) {
-    if (await bcrypt.compareSync(password, personPassword)) {
-      const token = await jwt.sign(personEmail, keys.jwt);
+  if (person !== null) {
+    if (await bcrypt.compareSync(password, person.password)) {
+      const token = await jwt.sign(person.email, keys.jwt);
       return res.status(200).json({
         message: 'sucess',
         data: {
-          name: personName,
+          name: person.name,
           token,
         },
       });
