@@ -5,6 +5,6 @@ const loginController = require('../domains/authentication/login');
 
 router.post('/email/sendConfirmationCode', emailController.sendConfirmationCode);
 router.post('/email/confirmEmail', emailController.confirmEmail);
-router.post('/login', loginController.login);
+router.post('/login/:userOrProvider', loginController.login);
 
 module.exports = router;
