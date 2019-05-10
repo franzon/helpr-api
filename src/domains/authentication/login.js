@@ -27,14 +27,29 @@ async function login(req, res) {
   const { email, password } = req.body;
 
   const user = await models.User.findOne({ email });
+  const provider = await models.Provider.findOne({ email });
+
+  let personEmail;
+  let personPassword;
+  let personName;
 
   if (user !== null) {
-    if (await bcrypt.compareSync(password, user.password)) {
-      const token = await jwt.sign(user.email, keys.jwt);
+    personEmail = user.email;
+    personPassword = user.password;
+    personName = user.name;
+  } else if (provider !== null) {
+    personEmail = provider.email;
+    personPassword = provider.password;
+    personName = provider.name;
+  }
+
+  if (user !== null || provider !== null) {
+    if (await bcrypt.compareSync(password, personPassword)) {
+      const token = await jwt.sign(personEmail, keys.jwt);
       return res.status(200).json({
         message: 'sucess',
         data: {
-          name: user.name,
+          name: personName,
           token,
         },
       });
@@ -42,7 +57,7 @@ async function login(req, res) {
     return res.status(400).json({ message: 'invalid password', data: null });
   }
 
-  return res.status(400).json({ message: 'user doesnt exist', data: null });
+  return res.status(400).json({ message: 'user/provider doesnt exist', data: null });
 }
 
 module.exports = { login };

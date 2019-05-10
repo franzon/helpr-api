@@ -8,7 +8,7 @@ const keys = require('../../utils/keys.json');
 
 describe('[DOMAIN/AUTHENTICATION] login.js', () => {
   describe('login', () => {
-    test('It returns error if user doesnt exists', async () => {
+    test('It returns error if user/provider doesnt exists', async () => {
       const response = await request(app)
         .post('/api/authentication/login')
         .send({
@@ -17,7 +17,7 @@ describe('[DOMAIN/AUTHENTICATION] login.js', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toStrictEqual('user doesnt exist');
+      expect(response.body.message).toStrictEqual('user/provider doesnt exist');
       expect(response.body.data).toBeNull();
     });
 
@@ -34,7 +34,7 @@ describe('[DOMAIN/AUTHENTICATION] login.js', () => {
       expect(response.body.data).toBeNull();
     });
 
-    test('It returns error for invalid password', async () => {
+    test('It returns error for invalid user password', async () => {
       const user = await new models.User({
         email: 'otavio@ogoes.de',
         name: 'Gord',
@@ -73,6 +73,37 @@ describe('[DOMAIN/AUTHENTICATION] login.js', () => {
       expect(response.status).toBe(200);
       expect(response.body.message).toStrictEqual('sucess');
       expect(response.body.data.name).toStrictEqual(user.name);
+      expect(response.body.data.token).toStrictEqual(token);
+    });
+    test('It returns provider name if provider exists and password is valid', async () => {
+      const provider = await new models.Provider({
+        email: 'otavio@ogoes.dev',
+        name: 'Gord',
+        password: await bcrypt.hash('12345678', 10),
+        cep: '44910000',
+        address: 'Rua São Sebastião',
+        neighborhood: 'Centro',
+        numberAddress: '378',
+        phoneNumber: '44991357268',
+        category: 'asdasdasd',
+        serviceDescription: 'Asdasdasd',
+        servicePrice: '1000',
+        cpf: '068.756.945-14',
+        documentImageAddress: 'asdasdas',
+      });
+      await provider.save();
+
+      const response = await request(app)
+        .post('/api/authentication/login')
+        .send({
+          email: 'otavio@ogoes.dev',
+          password: '12345678',
+        });
+
+      const token = await jwt.sign('otavio@ogoes.dev', keys.jwt);
+      expect(response.status).toBe(200);
+      expect(response.body.message).toStrictEqual('sucess');
+      expect(response.body.data.name).toStrictEqual(provider.name);
       expect(response.body.data.token).toStrictEqual(token);
     });
   });
