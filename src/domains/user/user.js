@@ -51,6 +51,8 @@ async function createUser(req, res) {
     },
   };
 
+  console.log(req.body);
+
   const error = validateRequest(
     {
       body: req.body,

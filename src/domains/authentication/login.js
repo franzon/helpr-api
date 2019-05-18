@@ -14,14 +14,14 @@ async function login(req, res) {
         .required(),
       password: joi
         .string()
-        .regex(regexes.password)
+        // .regex(regexes.password)
         .required(),
     },
   };
 
   const error = validateRequest({ body: req.body }, schema);
   if (error !== null) {
-    return res.status(400).json({ message: 'validation fail', data: null });
+    return res.status(400).json({ message: error.message, data: null });
   }
 
   const { email, password } = req.body;
@@ -32,7 +32,6 @@ async function login(req, res) {
   if (userOrProvider !== 'user' && userOrProvider !== 'provider') {
     return res.status(400).json({ message: 'wrong parameter', data: null });
   }
-
 
   if (userOrProvider === 'user') {
     person = await models.User.findOne({ email });
@@ -45,7 +44,7 @@ async function login(req, res) {
     if (await bcrypt.compareSync(password, person.password)) {
       const token = await jwt.sign(person.email, keys.jwt);
       return res.status(200).json({
-        message: 'sucess',
+        message: 'success',
         data: {
           name: person.name,
           token,
