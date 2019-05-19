@@ -5,7 +5,6 @@ const models = require('../../database/models');
 const app = require('../../app');
 const keys = require('../../utils/keys.json');
 
-
 describe('[DOMAIN/AUTHENTICATION] login.js', () => {
   describe('login', () => {
     test('It returns error for wrong parameter', async () => {
@@ -43,7 +42,7 @@ describe('[DOMAIN/AUTHENTICATION] login.js', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toStrictEqual('validation fail');
+      expect(response.body.message).not.toBeUndefined();
       expect(response.body.data).toBeNull();
     });
 
@@ -84,7 +83,7 @@ describe('[DOMAIN/AUTHENTICATION] login.js', () => {
 
       const token = await jwt.sign('otavio@ogoes.dev', keys.jwt);
       expect(response.status).toBe(200);
-      expect(response.body.message).toStrictEqual('sucess');
+      expect(response.body.message).toStrictEqual('success');
       expect(response.body.data.name).toStrictEqual(user.name);
       expect(response.body.data.token).toStrictEqual(token);
     });
@@ -115,7 +114,7 @@ describe('[DOMAIN/AUTHENTICATION] login.js', () => {
 
       const token = await jwt.sign('otavio@ogoes.dev', keys.jwt);
       expect(response.status).toBe(200);
-      expect(response.body.message).toStrictEqual('sucess');
+      expect(response.body.message).toStrictEqual('success');
       expect(response.body.data.name).toStrictEqual(provider.name);
       expect(response.body.data.token).toStrictEqual(token);
     });
