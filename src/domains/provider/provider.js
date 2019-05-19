@@ -13,9 +13,6 @@ async function addProvider(req, res) {
     neighborhood,
     numberAddress,
     phoneNumber,
-    category,
-    serviceDescription,
-    servicePrice,
     cpf,
   } = req.body;
 
@@ -68,9 +65,6 @@ async function addProvider(req, res) {
         neighborhood,
         numberAddress,
         phoneNumber,
-        category,
-        serviceDescription,
-        servicePrice,
         cpf,
       },
     },
@@ -90,9 +84,6 @@ async function addProvider(req, res) {
     neighborhood,
     numberAddress,
     phoneNumber,
-    category,
-    serviceDescription,
-    servicePrice,
     cpf,
   });
 
@@ -108,9 +99,7 @@ const findProvider = async (req, res) => {
   const schema = {
     params: {
       email: Joi.string()
-        .regex(
-          /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
-        )
+        .regex(regexes.email)
         .required(),
     },
   };
@@ -134,6 +123,7 @@ const findProvider = async (req, res) => {
       data: null,
     });
   }
+  provider.password = undefined;
 
   return res.status(200).send({
     message: 'success',
@@ -147,9 +137,7 @@ const deleteProvider = async (req, res) => {
   const schema = {
     params: {
       email: Joi.string()
-        .regex(
-          /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
-        )
+        .regex(regexes.email)
         .required(),
     },
   };
@@ -179,8 +167,62 @@ const deleteProvider = async (req, res) => {
   });
 };
 
+const addCategory = async (req, res) => {
+  const { email, activities } = req.body;
+
+  const schema = {
+    params: {
+      email: Joi.string()
+        .regex(regexes.email)
+        .required(),
+    },
+  };
+
+  const error = validateRequest(
+    {
+      params: {
+        email,
+      },
+    },
+    schema,
+  );
+
+  if (error !== null) return res.status(400).send({ message: 'fail validation', data: null });
+
+  const provider = await models.Provider.findOne({ email });
+  if (provider === null) return res.status(400).send({ message: 'provider not found' });
+
+  await Promise.all(
+    activities.map(async (activity) => {
+      const title = activity.category;
+      const category = await models.CategoriesProvider.findOne({ title });
+
+      const categoryActivity = new models.ActivitiesProvider({
+        ...activity,
+        // eslint-disable-next-line no-underscore-dangle
+        assignedTo: category.id,
+        provider,
+      });
+      await categoryActivity.save();
+
+      category.activities.push(categoryActivity);
+      provider.activities.push(categoryActivity);
+
+      // eslint-disable-next-line no-underscore-dangle
+      if (!provider.categories.some(cat => category.id === cat.id)) {
+        provider.categories.push(category);
+      }
+
+      await category.save();
+    }),
+  );
+  await provider.save();
+  return res.status(200).send({ message: 'success' });
+};
+
 module.exports = {
   addProvider,
   deleteProvider,
   findProvider,
+  addCategory,
 };
