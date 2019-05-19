@@ -27,7 +27,12 @@ async function login(req, res) {
   const { email, password } = req.body;
   const { userOrProvider } = req.params;
 
-  let person;
+  let person = null;
+
+  if (userOrProvider !== 'user' && userOrProvider !== 'provider') {
+    return res.status(400).json({ message: 'wrong parameter', data: null });
+  }
+
 
   if (userOrProvider === 'user') {
     person = await models.User.findOne({ email });

@@ -8,6 +8,19 @@ const keys = require('../../utils/keys.json');
 
 describe('[DOMAIN/AUTHENTICATION] login.js', () => {
   describe('login', () => {
+    test('It returns error for wrong parameter', async () => {
+      const response = await request(app)
+        .post('/api/authentication/login/house')
+        .send({
+          email: 'otavio@ogoes.dev',
+          password: '12345678',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toStrictEqual('wrong parameter');
+      expect(response.body.data).toBeNull();
+    });
+
     test('It returns error if user/provider doesnt exists', async () => {
       const response = await request(app)
         .post('/api/authentication/login/user')
