@@ -45,9 +45,6 @@ async function addProvider(req, res) {
           /^(?:(?:\+|00)?(55)\s?)?(?:\(?([1-9][0-9])\)?\s?)?(?:((?:9\d|[2-9])\d{3})-?(\d{4}))$/,
         )
         .required(),
-      category: Joi.string().required(),
-      serviceDescription: Joi.string().required(),
-      servicePrice: Joi.string().required(),
       cpf: Joi.string()
         .regex(regexes.cpf)
         .required(),
