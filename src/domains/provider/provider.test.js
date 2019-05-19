@@ -14,9 +14,6 @@ describe('addProvider', () => {
         neighborhood: 'Larpão',
         numberAddress: '27',
         phoneNumber: '(44)99999-1234',
-        category: 'Bricklayer',
-        serviceDescription: 'Bricklayer services',
-        servicePrice: '100 - 1000',
         cpf: '240.309.190-14',
       },
     );
@@ -35,9 +32,6 @@ describe('addProvider', () => {
       neighborhood: 'Larpão',
       numberAddress: '27',
       phoneNumber: '(44)29133-1213',
-      category: 'Bricklayer',
-      serviceDescription: 'Bricklayer services',
-      servicePrice: '100 - 1000',
       cpf: '240.309.190-14',
     };
 
@@ -60,9 +54,6 @@ describe('addProvider', () => {
         neighborhood: 'Larpão',
         numberAddress: '27',
         phoneNumber: '(44) 29999-1213',
-        category: 'Bricklayer',
-        serviceDescription: 'Bricklayer services',
-        servicePrice: '100 - 1000',
         cpf: '240309190-14',
       },
     );
@@ -83,9 +74,6 @@ describe('findProvider', () => {
       neighborhood: 'Larpão',
       numberAddress: '27',
       phoneNumber: '(44)29133-1213',
-      category: 'Bricklayer',
-      serviceDescription: 'Bricklayer services',
-      servicePrice: '100 - 1000',
       cpf: '240.309.190-14',
     });
 
@@ -126,9 +114,6 @@ describe('deleteProvider', () => {
       neighborhood: 'Larpão',
       numberAddress: '27',
       phoneNumber: '(44)29133-1213',
-      category: 'Bricklayer',
-      serviceDescription: 'Bricklayer services',
-      servicePrice: '100 - 1000',
       cpf: '240.309.190-14',
     });
 
@@ -155,5 +140,155 @@ describe('deleteProvider', () => {
     expect(res.status).toBe(400);
     expect(res.body.message).toStrictEqual('fail validation');
     expect(res.body.data).toBeNull();
+  });
+});
+
+describe('addCategory for provider', () => {
+  test('It should response error for user not found', async () => {
+    const category = new models.CategoriesProvider({
+      identifier: 'Builder',
+      title: 'Pedreiro',
+    });
+
+    await category.save();
+
+    const res = await request(app).post('/api/provider/category').send(
+      {
+        email: 'carlos@sumare.com',
+        activities: [
+          {
+            category: 'Pedreiro',
+            title: 'Azulejista',
+            description: 'Arrumo azulejo',
+            price: '12345',
+          },
+        ],
+      },
+    );
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toStrictEqual('provider not found');
+  });
+
+  test('It should response success for add category to provider', async () => {
+    const provider = new models.Provider({
+      email: 'carlos@sumare.com',
+      name: 'Carlos Sumare',
+      password: '12345678',
+      cep: '87302-050 ',
+      address: 'Rua das Palmeiras',
+      neighborhood: 'Larpão',
+      numberAddress: '27',
+      phoneNumber: '(44)29133-1213',
+      cpf: '240.309.190-14',
+    });
+
+    const category = new models.CategoriesProvider({
+      identifier: 'Builder',
+      title: 'Pedreiro',
+    });
+
+    await provider.save();
+    await category.save();
+
+    const res = await request(app).post('/api/provider/category').send(
+      {
+        email: 'carlos@sumare.com',
+        activities: [
+          {
+            category: 'Pedreiro',
+            title: 'Azulejista',
+            description: 'Arrumo azulejo',
+            price: '12345',
+          },
+        ],
+      },
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.message).toStrictEqual('success');
+  });
+
+  test('It shoulds response error for incorrect email', async () => {
+    const provider = new models.Provider({
+      email: 'carlos@sumare.com',
+      name: 'Carlos Sumare',
+      password: '12345678',
+      cep: '87302-050 ',
+      address: 'Rua das Palmeiras',
+      neighborhood: 'Larpão',
+      numberAddress: '27',
+      phoneNumber: '(44)29133-1213',
+      cpf: '240.309.190-14',
+    });
+
+    const category = new models.CategoriesProvider({
+      identifier: 'Builder',
+      title: 'Pedreiro',
+    });
+
+    await provider.save();
+    await category.save();
+
+    const res = await request(app).post('/api/provider/category').send(
+      {
+        email: 'abc',
+        activities: [
+          {
+            category: 'Pedreiro',
+            title: 'Azulejista',
+            description: 'Arrumo azulejo',
+            price: '12345',
+          },
+        ],
+      },
+    );
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toStrictEqual('fail validation');
+  });
+
+  test('No category duplication in provider', async () => {
+    let provider = new models.Provider({
+      email: 'carlos@sumare.com',
+      name: 'Carlos Sumare',
+      password: '12345678',
+      cep: '87302-050 ',
+      address: 'Rua das Palmeiras',
+      neighborhood: 'Larpão',
+      numberAddress: '27',
+      phoneNumber: '(44)29133-1213',
+      cpf: '240.309.190-14',
+    });
+
+    const category = new models.CategoriesProvider({
+      identifier: 'Builder',
+      title: 'Pedreiro',
+    });
+
+    await provider.save();
+    await category.save();
+
+    await request(app).post('/api/provider/category').send(
+      {
+        email: 'carlos@sumare.com',
+        activities: [
+          {
+            category: 'Pedreiro',
+            title: 'Azulejista',
+            description: 'Arrumo azulejo',
+            price: '12345',
+          },
+          {
+            category: 'Pedreiro',
+            title: 'Bater laje',
+            description: 'Bato laje com qualidade',
+            price: '777',
+          },
+        ],
+      },
+    );
+    provider = await models.Provider.findOne({ email: 'carlos@sumare.com' });
+    expect(provider.categories).toHaveLength(1);
   });
 });

@@ -11,6 +11,7 @@ const authenticationRouter = require('./routes/authentication');
 const categoriesRouter = require('./routes/categories');
 const userRouter = require('./routes/user');
 const providerRouter = require('./routes/provider');
+const activititesRouter = require('./routes/activities');
 
 const app = express();
 dotenv.config();
@@ -24,6 +25,7 @@ app.use(compression());
 app.use(morgan('tiny'));
 
 const router = express.Router();
+router.use('/activities', activititesRouter);
 router.use('/authentication', authenticationRouter);
 router.use('/categories', categoriesRouter);
 router.use('/user', userRouter);

@@ -34,18 +34,14 @@ const schema = mongoose.Schema({
     type: String,
     required: true,
   },
-  category: {
-    type: String,
-    required: true,
-  },
-  serviceDescription: {
-    type: String,
-    required: true,
-  },
-  servicePrice: {
-    type: String,
-    required: true,
-  },
+  categories: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CategoriesProvider',
+  }],
+  activities: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ActivitiesProvider',
+  }],
   cpf: {
     type: String,
     required: true,
