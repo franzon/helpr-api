@@ -4,9 +4,9 @@ const app = require('./app');
 
 const server = require('http').Server(app);
 
-const io = require('socket.io')(server, {
-  path: '/users',
-});
+const WebSocket = require('ws');
+
+const ws = new WebSocket.Server({ server });
 
 const host = process.env.HOST;
 const port = process.env.PORT;
@@ -19,63 +19,92 @@ server.listen(port, host, () => {
 const providers = [];
 const clients = [];
 
-io.on('connection', (socket) => {
+let n = 0;
+
+ws.on('connection', (socket) => {
   let addedUser = false;
+  console.log('nova conexão');
 
-  socket.on('add provider', (user) => {
-    if (addedUser) return;
+  socket.on('message', (data) => {
+    const content = JSON.parse(data);
+    console.log(content);
+    switch (content.action) {
+      case 'add provider':
+        if (addedUser) return;
 
-    // eslint-disable-next-line no-param-reassign
-    socket.userName = user.userName;
-    // eslint-disable-next-line no-param-reassign
-    socket.tipe = 'provider';
-    // eslint-disable-next-line no-param-reassign
-    socket.userId = user.id;
+        // eslint-disable-next-line no-param-reassign
+        socket.userName = content.user.userName;
+        // eslint-disable-next-line no-param-reassign
+        socket.tipe = 'provider';
+        // eslint-disable-next-line no-param-reassign
+        socket.userId = content.user.userId;
+        // eslint-disable-next-line no-param-reassign
+        socket.id = n;
 
-    providers.push({
-      id: socket.id,
-      userName: socket.userName,
-      userId: socket.userId,
-    });
+        n += 1;
 
-    clients.forEach((client) => {
-      socket.broadcast.to(client.id).emit('providers', providers);
-    });
-
-    addedUser = true;
-  });
-
-  socket.on('add client', (user) => {
-    if (addedUser) return;
-
-    // eslint-disable-next-line no-param-reassign
-    socket.userName = user.userName;
-    // eslint-disable-next-line no-param-reassign
-    socket.tipe = 'client';
-    // eslint-disable-next-line no-param-reassign
-    socket.userId = user.id;
-
-    clients.push({
-      id: socket.id,
-      userName: socket.userName,
-      userId: socket.userId,
-    });
-
-    addedUser = true;
-  });
-
-  socket.on('new service', (user) => {
-    providers.forEach((provider) => {
-      if (provider.id === user.providerId) {
-        socket.broadcast.to(provider.id).emit('new service', {
+        providers.push({
           id: socket.id,
           userName: socket.userName,
           userId: socket.userId,
         });
-      }
-    });
-  });
+        console.log(`providers ${JSON.stringify(providers)}`);
+        clients.forEach((client) => {
+          ws.clients.forEach((sClient) => {
+            if (sClient.id === client.id) {
+              sClient.send({ listener: 'providers', providers });
+            }
+          });
+        });
 
+        socket.send(JSON.stringify({ listener: 'add provider', message: true }));
+        addedUser = true;
+
+        break;
+
+      case 'add client':
+
+        if (addedUser) return;
+
+        // eslint-disable-next-line no-param-reassign
+        socket.userName = content.user.userName;
+        // eslint-disable-next-line no-param-reassign
+        socket.tipe = 'client';
+        // eslint-disable-next-line no-param-reassign
+        socket.userId = content.user.userId;
+        // eslint-disable-next-line no-param-reassign
+        socket.id = n;
+
+        n += 1;
+
+        clients.push({
+          id: socket.id,
+          userName: socket.userName,
+          userId: socket.userId,
+        });
+
+        addedUser = true;
+
+        break;
+
+      case 'new service':
+        providers.forEach((provider) => {
+          if (provider.id === content.user.providerId) {
+            socket.broadcast.to(provider.id).emit('new service', {
+              id: socket.id,
+              userName: socket.userName,
+              userId: socket.userId,
+            });
+          }
+        });
+
+        break;
+
+      default:
+        break;
+    }
+  });
+  /*
   socket.on('accept service', (user) => {
     clients.forEach((client) => {
       if (client.id === user.clientId) {
@@ -112,10 +141,10 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('message', (data) => {
+  socket.on('message', (content) => {
     socket.broadcast.to(data.userId).emit('message', { id: socket.id, message: data.message });
   });
-
+*/
   socket.on('disconnect', () => {
     if (socket.tipe === 'provider') {
       providers.forEach((it, index) => {
