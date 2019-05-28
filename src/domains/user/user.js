@@ -4,6 +4,15 @@ const models = require('../../database/models');
 const { validateRequest, regexes } = require('../../utils/validation');
 
 /*
+    GET /getUserInfo
+
+    Get user info by token
+ */
+async function getUserInfo(req, res) {
+  res.json({ message: 'user info', data: req.user });
+}
+
+/*
     GET /getUserNameByEmail
 
     Check if an user exists by its email.
@@ -43,7 +52,7 @@ async function createUser(req, res) {
         .regex(regexes.email)
         .required(),
       name: Joi.string()
-        .regex(regexes.name)
+        // .regex(regexes.name)
         .required(),
       password: Joi.string()
         .regex(regexes.password)
@@ -184,4 +193,4 @@ async function deleteUser(req, res) {
 }
 */
 
-module.exports = { getUserNameByEmail, createUser };
+module.exports = { getUserInfo, getUserNameByEmail, createUser };
