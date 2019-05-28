@@ -29,7 +29,7 @@ describe('[DOMAIN/AUTHENTICATION] login.js', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toStrictEqual('user/provider doesnt exist');
+      expect(response.body.message).toStrictEqual('user/provider doesnt exists');
       expect(response.body.data).toBeNull();
     });
 

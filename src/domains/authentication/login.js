@@ -54,7 +54,7 @@ async function login(req, res) {
     return res.status(400).json({ message: 'invalid password', data: null });
   }
 
-  return res.status(400).json({ message: 'user/provider doesnt exist', data: null });
+  return res.status(400).json({ message: 'user/provider doesnt exists', data: null });
 }
 
 module.exports = { login };
