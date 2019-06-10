@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 require('./database/database');
 // eslint-disable-next-line import/order
 const app = require('./app');
@@ -23,77 +24,177 @@ let n = 0;
 
 ws.on('connection', (socket) => {
   let addedUser = false;
-  console.log('nova conexão');
 
   socket.on('message', (data) => {
     const content = JSON.parse(data);
-    console.log(content);
+
     switch (content.action) {
-      case 'add provider':
+      case 'addProvider':
         if (addedUser) return;
 
-        // eslint-disable-next-line no-param-reassign
-        socket.userName = content.user.userName;
-        // eslint-disable-next-line no-param-reassign
-        socket.tipe = 'provider';
-        // eslint-disable-next-line no-param-reassign
-        socket.userId = content.user.userId;
-        // eslint-disable-next-line no-param-reassign
-        socket.id = n;
-
+        socket.userName = content.user.userName; // Nome
+        socket.type = 'provider';
+        socket.dbId = content.user.dbId; // Id salvo no banco
+        socket.id = n; // Id respectivo para o socket
         n += 1;
 
         providers.push({
           id: socket.id,
           userName: socket.userName,
-          userId: socket.userId,
+          dbId: socket.dbId,
+          socket,
         });
-        console.log(`providers ${JSON.stringify(providers)}`);
+
         clients.forEach((client) => {
           ws.clients.forEach((sClient) => {
             if (sClient.id === client.id) {
-              sClient.send({ listener: 'providers', providers });
+              sClient.send(JSON.stringify({
+                listener: 'providers',
+                providers: providers.map(provider => ({ id: provider.dbId, socketId: socket.id })),
+              }));
             }
           });
         });
 
-        socket.send(JSON.stringify({ listener: 'add provider', message: true }));
+        socket.send(JSON.stringify({ listener: 'addProvider', message: true }));
         addedUser = true;
 
         break;
 
-      case 'add client':
+      case 'addClient':
 
         if (addedUser) return;
 
-        // eslint-disable-next-line no-param-reassign
-        socket.userName = content.user.userName;
-        // eslint-disable-next-line no-param-reassign
-        socket.tipe = 'client';
-        // eslint-disable-next-line no-param-reassign
-        socket.userId = content.user.userId;
-        // eslint-disable-next-line no-param-reassign
-        socket.id = n;
+        socket.userName = content.user.userName; // Nome
+        socket.type = 'client';
+        socket.dbId = content.user.dbId; // Id de armazenamento no banco
+        socket.id = n; // Id respectivo para o socket
 
         n += 1;
 
         clients.push({
           id: socket.id,
           userName: socket.userName,
-          userId: socket.userId,
+          dbId: socket.dbId,
+          socket,
         });
 
+        socket.send(JSON.stringify({ listener: 'providers', providers }));
         addedUser = true;
 
         break;
 
-      case 'new service':
+      case 'newService':
         providers.forEach((provider) => {
           if (provider.id === content.user.providerId) {
-            socket.broadcast.to(provider.id).emit('new service', {
-              id: socket.id,
-              userName: socket.userName,
-              userId: socket.userId,
+            ws.clients.forEach((sProvider) => {
+              if (sProvider.id === provider.id) {
+                sProvider.send(JSON.stringify({
+                  listener: 'newService',
+                  user: {
+                    id: socket.id,
+                    userName: socket.userName,
+                    dbId: socket.dbId,
+                  },
+                }));
+              }
+            });
+          }
+        });
+
+        break;
+
+      case 'acceptService':
+        clients.forEach((client) => {
+          if (client.id === content.user.clientId) {
+            ws.clients.forEach((sClient) => {
+              if (sClient.id === client.id) {
+                sClient.send(JSON.stringify({
+                  listener: 'acceptService',
+                  user: {
+                    id: socket.id,
+                    userName: socket.userName,
+                    dbId: socket.dbId,
+                  },
+                }));
+              }
+            });
+          }
+        });
+        break;
+
+      case 'cancelService':
+        providers.forEach((provider) => {
+          if (provider.id === content.user.providerId) {
+            ws.clients.forEach((sProvider) => {
+              if (sProvider.id === provider.id) {
+                sProvider.send(JSON.stringify({
+                  listener: 'cancelService',
+                  user: {
+                    id: socket.id,
+                    userName: socket.userName,
+                    dbId: socket.dbId,
+                  },
+                }));
+              }
+            });
+          }
+        });
+
+        break;
+
+      case 'denyService':
+        clients.forEach((client) => {
+          if (client.id === content.user.clientId) {
+            ws.clients.forEach((sClient) => {
+              if (sClient.id === content.user.clientId) {
+                sClient.send(JSON.stringify({
+                  listener: 'denyService',
+                  user: {
+                    id: socket.id,
+                    userName: socket.userName,
+                    dbId: socket.dbId,
+                  },
+                }));
+              }
+            });
+          }
+        });
+
+        break;
+
+      case 'messageForProvider':
+
+        providers.forEach((provider) => {
+          if (provider.id === content.user.providerId) {
+            provider.socket.send(JSON.stringify({
+              listener: 'messageForProvider',
+              content: {
+                dbId: socket.id,
+                userName: socket.userName,
+                message: content.message,
+              },
+            }));
+          }
+        });
+
+        break;
+
+      case 'messageForClient':
+
+        clients.forEach((client) => {
+          if (client.id === content.user.clientId) {
+            ws.clients.forEach((sClient) => {
+              if (sClient.id === content.user.clientId) {
+                sClient.send(JSON.stringify({
+                  listener: 'messageForClient',
+                  content: {
+                    dbId: socket.id,
+                    userName: socket.userName,
+                    message: content.message,
+                  },
+                }));
+              }
             });
           }
         });
@@ -104,81 +205,47 @@ ws.on('connection', (socket) => {
         break;
     }
   });
-  /*
-  socket.on('accept service', (user) => {
+});
+ws.on('close', (socket) => {
+  if (socket.type === 'provider') {
+    providers.forEach((it, index) => {
+      if (it.id === socket.id) {
+        providers.pop(index);
+      }
+    });
+
     clients.forEach((client) => {
-      if (client.id === user.clientId) {
-        socket.broadcast.to(client.id).emit('confirm service', {
-          id: socket.id,
-          userName: socket.userName,
-          userId: socket.userId,
-        });
-      }
-    });
-  });
-
-  socket.on('cancel service', (user) => {
-    providers.forEach((provider) => {
-      if (provider.id === user.providerId) {
-        socket.broadcast.to(provider.id).emit('cancel service', {
-          id: socket.id,
-          userName: socket.userName,
-          userId: socket.userId,
-        });
-      }
-    });
-  });
-
-  socket.on('deny service', (user) => {
-    clients.forEach((client) => {
-      if (client.id === user.clientId) {
-        socket.broadcast.to(client.id).emit('deny service', {
-          id: socket.id,
-          userName: socket.userName,
-          userId: socket.userId,
-        });
-      }
-    });
-  });
-
-  socket.on('message', (content) => {
-    socket.broadcast.to(data.userId).emit('message', { id: socket.id, message: data.message });
-  });
-*/
-  socket.on('disconnect', () => {
-    if (socket.tipe === 'provider') {
-      providers.forEach((it, index) => {
-        if (it.id === socket.id) {
-          providers.pop(index);
+      ws.clients.forEach((sClient) => {
+        if (sClient.id === client.id) {
+          sClient.send(JSON.stringify({
+            listener: 'providers',
+            providers,
+          }));
         }
       });
-
-      clients.forEach((client) => {
-        socket.broadcast.to(client.id).emit('providers', providers);
-      });
-    }
-
-    if (socket.tipe === 'client') {
-      clients.forEach((it, index) => {
-        if (it.id === socket.id) {
-          clients.pop(index);
-        }
-      });
-    }
-
-    console.log('providers: ');
-
-    providers.forEach((provider) => {
-      console.log(JSON.stringify(provider));
     });
+  }
 
-    console.log('clients: ');
-
-    clients.forEach((client) => {
-      console.log(JSON.stringify(client));
+  if (socket.type === 'client') {
+    clients.forEach((it, index) => {
+      if (it.id === socket.id) {
+        clients.pop(index);
+      }
     });
+  }
 
-    // eslint-disable-next-line no-console
-    console.log(`disconnected ${socket.id}`);
+  console.log('providers: ');
+
+  providers.forEach((provider) => {
+    console.log(JSON.stringify(provider));
   });
+
+  console.log('clients: ');
+
+  clients.forEach((client) => {
+    console.log(JSON.stringify(client));
+  });
+
+  // eslint-disable-next-line no-console
+  console.log(`disconnected ${socket.id}`);
 });
