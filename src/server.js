@@ -85,8 +85,8 @@ ws.on('connection', (socket) => {
                   dbId: socket.dbId,
                 },
                 userLocation: {
-                  longitude: socket.longitude,
-                  latitude: socket.latitude,
+                  longitude: content.userLocation.longitude,
+                  latitude: content.userLocation.latitude,
                 },
               }),
             );
