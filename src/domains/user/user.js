@@ -4,6 +4,15 @@ const models = require('../../database/models');
 const { validateRequest, regexes } = require('../../utils/validation');
 
 /*
+    GET /getUserInfo
+
+    Get user info by token
+ */
+async function getUserInfo(req, res) {
+  res.json({ message: 'user info', data: req.user });
+}
+
+/*
     GET /getUserNameByEmail
 
     Check if an user exists by its email.
@@ -38,15 +47,12 @@ async function getUserNameByEmail(req, res) {
 
 async function createUser(req, res) {
   const schema = {
-    params: {
+    body: {
       email: Joi.string()
         .regex(regexes.email)
         .required(),
       name: Joi.string()
-        .regex(regexes.name)
-        .required(),
-      phone: Joi.string()
-        .regex(regexes.phone)
+        // .regex(regexes.name)
         .required(),
       password: Joi.string()
         .regex(regexes.password)
@@ -54,48 +60,38 @@ async function createUser(req, res) {
     },
   };
 
-  const {
-    name,
-    email,
-    password,
-    phone,
-  } = req.body;
+  console.log(req.body);
 
   const error = validateRequest(
     {
-      params: {
-        email,
-        name,
-        phone,
-        password,
-      },
+      body: req.body,
     },
     schema,
   );
 
-  if (error) return res.status(400).json({ success: false, message: error, data: null });
+  const { name, email, password } = req.body;
 
-  const user = await models.User.find({ email });
-  if (user !== undefined && user.length) return res.status(400).json({ success: false, error: 'User already exists.' });
+  if (error) return res.status(400).json({ message: error, data: null });
 
-  const newUser = await models.User.create({
+  const user = await models.User.findOne({ email });
+  if (user) return res.status(400).json({ message: 'user already exists', data: null });
+
+  await models.User.create({
     name,
     email,
-    phone,
     password: await bcrypt.hash(password, 10),
   });
 
-  /* istanbul ignore next */
-  if (!newUser) {
-    return res.status(500).json({ success: false, error: 'erro de conexao com' });
-  }
+  // /* istanbul ignore next */
+  // if (!newUser) {
+  //   return res.status(500).json({ success: false, error: 'erro de conexao com' });
+  // }
 
   return res.json({
-    success: true,
+    message: 'user created',
     data: {
       name,
       email,
-      phone,
     },
   });
 }
@@ -197,4 +193,4 @@ async function deleteUser(req, res) {
 }
 */
 
-module.exports = { getUserNameByEmail, createUser };
+module.exports = { getUserInfo, getUserNameByEmail, createUser };

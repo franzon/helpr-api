@@ -5,6 +5,8 @@ const schema = mongoose.Schema({
   name: String,
   phone: String,
   password: String,
+  credits: { type: Number, default: 0 },
+  reputation: { type: Number, default: 0 },
   isConfirmed: {
     type: mongoose.Schema.Types.Boolean,
     default: false,

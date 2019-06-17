@@ -14,27 +14,39 @@ async function login(req, res) {
         .required(),
       password: joi
         .string()
-        .regex(regexes.password)
+        // .regex(regexes.password)
         .required(),
     },
   };
 
   const error = validateRequest({ body: req.body }, schema);
   if (error !== null) {
-    return res.status(400).json({ message: 'validation fail', data: null });
+    return res.status(400).json({ message: error.message, data: null });
   }
 
   const { email, password } = req.body;
+  const { userOrProvider } = req.params;
 
-  const user = await models.User.findOne({ email });
+  let person = null;
 
-  if (user !== null) {
-    if (await bcrypt.compareSync(password, user.password)) {
-      const token = await jwt.sign(user.email, keys.jwt);
+  if (userOrProvider !== 'user' && userOrProvider !== 'provider') {
+    return res.status(400).json({ message: 'wrong parameter', data: null });
+  }
+
+  if (userOrProvider === 'user') {
+    person = await models.User.findOne({ email });
+  }
+  if (userOrProvider === 'provider') {
+    person = await models.Provider.findOne({ email });
+  }
+
+  if (person !== null) {
+    if (await bcrypt.compareSync(password, person.password)) {
+      const token = await jwt.sign(person.email, keys.jwt);
       return res.status(200).json({
-        message: 'sucess',
+        message: 'success',
         data: {
-          name: user.name,
+          name: person.name,
           token,
         },
       });
@@ -42,7 +54,7 @@ async function login(req, res) {
     return res.status(400).json({ message: 'invalid password', data: null });
   }
 
-  return res.status(400).json({ message: 'user doesnt exist', data: null });
+  return res.status(400).json({ message: 'user/provider doesnt exists', data: null });
 }
 
 module.exports = { login };
