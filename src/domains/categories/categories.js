@@ -15,29 +15,11 @@ async function addCategory(req, res) {
 
   const categoryCreated = await models.CategoriesProvider.create({ identifier, title });
 
-  // await Promise.all(activities.map(async (activity) => {
-  //   const categoryActivity = new models.ActivitiesProvider({
-  //     ...activity,
-  //     category: categoryCreated.id,
-  //   });
-  //   await categoryActivity.save();
-  //   categoryCreated.activities.push(categoryActivity);
-  // }));
-  // await categoryCreated.save();
   return res.status(200).send({ message: 'category created', data: categoryCreated });
 }
 
 async function getCategories(req, res) {
   const categories = await models.CategoriesProvider.find();
-
-  return res.status(200).send({
-    message: 'success',
-    data: categories,
-  });
-}
-
-async function getCategoriesAndActivities(req, res) {
-  const categories = await models.CategoriesProvider.find().populate('ActivitiesProvider');
 
   return res.status(200).send({
     message: 'success',
@@ -83,6 +65,5 @@ module.exports = {
   addCategory,
   getCategories,
   getCategoryById,
-  getCategoriesAndActivities,
   deleteCategory,
 };

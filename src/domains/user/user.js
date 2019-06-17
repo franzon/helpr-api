@@ -3,6 +3,58 @@ const bcrypt = require('bcrypt');
 const models = require('../../database/models');
 const { validateRequest, regexes } = require('../../utils/validation');
 
+async function getUserAddresses(req, res) {
+  try {
+    const { email } = req.user;
+
+    const user = await models.User.findOne({ email }).populate('addresses');
+    res.json({ message: 'user addresses', data: { addresses: user.addresses } });
+  } catch (error) {
+    res.status(200).send({ message: 'error', data: null });
+  }
+}
+
+async function addUserAddress(req, res) {
+  try {
+    const schema = {
+      body: {
+        state: Joi.string().required(),
+        city: Joi.string().required(),
+        neighborhood: Joi.string().required(),
+        street: Joi.string().required(),
+        number: Joi.string().required(),
+        complement: Joi.optional(),
+      },
+    };
+
+    const error = validateRequest({ body: req.body }, schema);
+    if (error !== null) return res.status(400).json({ message: error, data: null });
+
+    const { email } = req.user;
+    let user = await models.User.findOne({ email });
+
+    const {
+      state, city, neighborhood, street, number, complement,
+    } = req.body;
+
+    const newAddress = await new models.Address({
+      state,
+      city,
+      neighborhood,
+      street,
+      number,
+      complement,
+    }).save();
+    user.addresses.push(newAddress);
+
+    user = await user.save();
+    user = await models.User.findOne({ email }).populate('addresses');
+    return res.json({ message: 'address added', data: { addresses: user.addresses } });
+  } catch (error) {
+    return res.status(200).send({ message: 'error', data: null });
+  }
+}
+
 /*
     GET /getUserInfo
 
@@ -79,7 +131,7 @@ async function createUser(req, res) {
   await models.User.create({
     name,
     email,
-    password: await bcrypt.hash(password, 10),
+    password,
   });
 
   // /* istanbul ignore next */
@@ -193,4 +245,10 @@ async function deleteUser(req, res) {
 }
 */
 
-module.exports = { getUserInfo, getUserNameByEmail, createUser };
+module.exports = {
+  getUserInfo,
+  getUserNameByEmail,
+  createUser,
+  getUserAddresses,
+  addUserAddress,
+};

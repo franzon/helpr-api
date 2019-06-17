@@ -70,12 +70,10 @@ async function addProvider(req, res) {
 
   if (error !== null) return res.status(400).send({ message: 'fail validation', data: null });
 
-  const hashPassword = await bcrypt.hash(password, 10);
-
   const resProvider = await models.Provider.create({
     email,
     name,
-    password: hashPassword,
+    password,
     cep,
     address,
     neighborhood,
