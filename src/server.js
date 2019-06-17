@@ -60,7 +60,7 @@ ws.on('connection', (socket) => {
           clients.forEach((client) => {
             client.socket.send(JSON.stringify(providerListener));
           });
-          socket.send(JSON.stringify({ bucetão: 'true' }));
+          socket.send(JSON.stringify({ connected: 'true' }));
         } else if (socket.type === 'client') {
           clients.push({
             id: socket.id,
@@ -83,6 +83,10 @@ ws.on('connection', (socket) => {
                   id: socket.id,
                   userName: socket.userName,
                   dbId: socket.dbId,
+                },
+                userLocation: {
+                  longitude: socket.longitude,
+                  latitude: socket.latitude,
                 },
               }),
             );
