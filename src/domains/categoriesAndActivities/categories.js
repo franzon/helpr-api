@@ -6,7 +6,7 @@ async function addCategory(req, res) {
   const { identifier, title, activities } = req.body;
 
   const category = await models.CategoriesProvider.find({ identifier });
-  if ((category !== undefined) && (category.length !== 0)) {
+  if (category !== undefined && category.length !== 0) {
     return res.status(400).send({
       message: 'category already created',
       data: null,
@@ -15,15 +15,15 @@ async function addCategory(req, res) {
 
   const categoryCreated = await models.CategoriesProvider.create({ identifier, title });
 
-  await Promise.all(activities.map(async (activity) => {
-    const categoryActivity = new models.ActivitiesProvider({
-      ...activity,
-      category: categoryCreated.id,
-    });
-    await categoryActivity.save();
-    categoryCreated.activities.push(categoryActivity);
-  }));
-  await categoryCreated.save();
+  // await Promise.all(activities.map(async (activity) => {
+  //   const categoryActivity = new models.ActivitiesProvider({
+  //     ...activity,
+  //     category: categoryCreated.id,
+  //   });
+  //   await categoryActivity.save();
+  //   categoryCreated.activities.push(categoryActivity);
+  // }));
+  // await categoryCreated.save();
   return res.status(200).send({ message: 'category created', data: categoryCreated });
 }
 
