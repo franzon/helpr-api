@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const schema = mongoose.Schema({
   email: {
@@ -14,45 +15,13 @@ const schema = mongoose.Schema({
     type: String,
     required: true,
   },
-  cep: {
-    type: String,
-    required: true,
-  },
-  address: {
-    type: String,
-    required: true,
-  },
-  neighborhood: {
-    type: String,
-    required: true,
-  },
-  numberAddress: {
-    type: String,
-    required: true,
-  },
   phoneNumber: {
-    type: String,
-    required: true,
-  },
-  category: {
-    type: String,
-    required: true,
-  },
-  serviceDescription: {
-    type: String,
-    required: true,
-  },
-  servicePrice: {
     type: String,
     required: true,
   },
   cpf: {
     type: String,
     required: true,
-  },
-  documentImageAddress: {
-    type: String,
-    required: false,
   },
   isConfirmed: {
     type: Boolean,
@@ -62,6 +31,26 @@ const schema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  profilePictureUrl: {
+    type: String,
+    default: 'https://randomuser.me/api/portraits/men/61.jpg',
+  },
+  serviceDescription: {
+    type: String,
+    default: 'lorem ipsum',
+  },
+  minServicePrice: {
+    type: Number,
+    default: 0,
+  },
+  maxServicePrice: {
+    type: Number,
+    default: Infinity,
+  },
+});
+
+schema.pre('save', async function hook() {
+  this.password = await bcrypt.hash(this.password, 10);
 });
 
 module.exports = mongoose.model('Provider', schema);
