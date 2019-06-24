@@ -61,7 +61,9 @@ async function addUserAddress(req, res) {
     Get user info by token
  */
 async function getUserInfo(req, res) {
-  res.json({ message: 'user info', data: req.user });
+  const user = await models.User.findOne({ email: req.user.email }).populate('addresses');
+
+  res.json({ message: 'user info', data: user });
 }
 
 /*
