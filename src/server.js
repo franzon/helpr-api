@@ -1,14 +1,25 @@
 /* eslint-disable no-console */
 /* eslint-disable no-param-reassign */
 require('./database/database');
+const url = require('url');
 // eslint-disable-next-line import/order
 const app = require('./app');
 
 const server = require('http').Server(app);
 
 const WebSocket = require('ws');
+const jwt = require('jsonwebtoken');
+const keys = require('./utils/keys.json');
 
-const ws = new WebSocket.Server({ server });
+const verifyClient = (info, done) => {
+  const { query } = url.parse(info.req.url, true);
+  jwt.verify(query.token, keys.jwt, (err) => {
+    if (err) return done(false, 403, 'invalid token');
+    return done(true);
+  });
+};
+
+const ws = new WebSocket.Server({ server, verifyClient });
 
 const host = process.env.HOST;
 const port = process.env.PORT;
@@ -74,6 +85,9 @@ ws.on('connection', (socket) => {
         break;
 
       case 'newService':
+        socket.userLocation = content.userLocation;
+        socket.service = content.service;
+
         providers.forEach((provider) => {
           if (provider.id === content.user.providerId) {
             provider.socket.send(
@@ -84,10 +98,8 @@ ws.on('connection', (socket) => {
                   userName: socket.userName,
                   dbId: socket.dbId,
                 },
-                userLocation: {
-                  longitude: socket.longitude,
-                  latitude: socket.latitude,
-                },
+                userLocation: socket.userLocation,
+                service: socket.service,
               }),
             );
           }
@@ -97,7 +109,7 @@ ws.on('connection', (socket) => {
 
       case 'acceptService':
         clients.forEach((client) => {
-          if (client.id === content.user.clientId) {
+          if (client.id === content.user.id) {
             client.socket.send(
               JSON.stringify({
                 listener: 'acceptService',
@@ -132,7 +144,7 @@ ws.on('connection', (socket) => {
 
       case 'denyService':
         clients.forEach((client) => {
-          if (client.id === content.user.clientId) {
+          if (client.id === content.user.id) {
             client.socket.send(
               JSON.stringify({
                 listener: 'denyService',
