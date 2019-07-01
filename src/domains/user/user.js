@@ -1,6 +1,6 @@
 const Joi = require('joi');
-const bcrypt = require('bcrypt');
 const models = require('../../database/models');
+const { sendEmail } = require('../../utils/email');
 const { validateRequest, regexes } = require('../../utils/validation');
 
 async function getUserAddresses(req, res) {
@@ -114,8 +114,6 @@ async function createUser(req, res) {
     },
   };
 
-  console.log(req.body);
-
   const error = validateRequest(
     {
       body: req.body,
@@ -135,6 +133,23 @@ async function createUser(req, res) {
     email,
     password,
   });
+
+  // Makes more sense to send validation code here instead of user asking it...
+  const subject = 'Confirmation Code';
+
+  let confirmationCode = '';
+  for (let i = 0; i < 6; i += 1) {
+    confirmationCode += Math.floor(Math.random() * 10 + 1).toString();
+  }
+
+  const text = `
+    This is your confirmation code: 
+    
+          ${confirmationCode}
+    
+    `;
+
+  sendEmail(email, subject, text);
 
   // /* istanbul ignore next */
   // if (!newUser) {
