@@ -151,6 +151,9 @@ async function createUser(req, res) {
 
   sendEmail(email, subject, text);
 
+  const emailModel = new models.EmailConfirmation({ email, confirmationCode });
+  await emailModel.save();
+
   // /* istanbul ignore next */
   // if (!newUser) {
   //   return res.status(500).json({ success: false, error: 'erro de conexao com' });
