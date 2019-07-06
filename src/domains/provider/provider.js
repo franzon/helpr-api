@@ -1,7 +1,25 @@
-const bcrypt = require('bcrypt');
 const Joi = require('joi');
 const models = require('../../database/models');
 const { validateRequest, regexes } = require('../../utils/validation');
+
+async function getProvidersByCategory(req, res) {
+  // não adicionaram cagetegory no model Provider...
+
+  // const { category } = req.body;
+
+  // if (!category) {
+  //   return res.status(400).send({
+  //     message: 'category not found',
+  //     data: null,
+  //   });
+  // }
+
+  const providers = await models.Provider.find({}).select('-password');
+  return res.status(200).send({
+    message: 'success',
+    data: providers,
+  });
+}
 
 async function addProvider(req, res) {
   const {
@@ -216,6 +234,7 @@ const addCategory = async (req, res) => {
 };
 
 module.exports = {
+  getProvidersByCategory,
   addProvider,
   deleteProvider,
   findProvider,

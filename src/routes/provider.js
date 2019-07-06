@@ -8,5 +8,6 @@ providerRouter.post('/', providerController.addProvider);
 providerRouter.post('/category', providerController.addCategory);
 providerRouter.delete('/:email', providerController.deleteProvider);
 providerRouter.get('/findProvider/:email', providerController.findProvider);
+providerRouter.get('/category', providerController.getProvidersByCategory);
 
 module.exports = providerRouter;
