@@ -5,7 +5,7 @@ const providerController = require('../domains/provider/provider');
 // providerRouter.use(authMiddleware);
 
 providerRouter.post('/', providerController.addProvider);
-providerRouter.post('/category', providerController.addCategory);
+// providerRouter.post('/category', providerController.addCategory);
 providerRouter.delete('/:email', providerController.deleteProvider);
 providerRouter.get('/findProvider/:email', providerController.findProvider);
 providerRouter.get('/category', providerController.getProvidersByCategory);
