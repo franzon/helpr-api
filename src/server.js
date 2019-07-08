@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable no-param-reassign */
 require('./database/database');
+
 const url = require('url');
 // eslint-disable-next-line import/order
 const app = require('./app');
@@ -19,7 +20,7 @@ const verifyClient = (info, done) => {
   });
 };
 
-const ws = new WebSocket.Server({ server, verifyClient });
+const ws = new WebSocket.Server({ server });
 
 const host = process.env.HOST;
 const port = process.env.PORT;
@@ -87,7 +88,6 @@ ws.on('connection', (socket) => {
       case 'newService':
         socket.userLocation = content.userLocation;
         socket.service = content.service;
-
         providers.forEach((provider) => {
           if (provider.id === content.user.providerId) {
             provider.socket.send(
@@ -100,6 +100,10 @@ ws.on('connection', (socket) => {
                 },
                 userLocation: socket.userLocation,
                 service: socket.service,
+                userLocation: {
+                  longitude: content.userLocation.longitude,
+                  latitude: content.userLocation.latitude,
+                },
               }),
             );
           }
