@@ -41,6 +41,7 @@ async function login(req, res) {
   }
 
   if (person !== null) {
+    console.log(password);
     if (await bcrypt.compareSync(password, person.password)) {
       const token = await jwt.sign(person.email, keys.jwt);
       return res.status(200).json({
