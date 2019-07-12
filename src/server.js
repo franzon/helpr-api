@@ -42,6 +42,7 @@ ws.on('connection', (socket) => {
 
   socket.on('message', (data) => {
     const content = JSON.parse(data);
+    console.log(content)
 
     switch (content.action) {
       case 'add':
